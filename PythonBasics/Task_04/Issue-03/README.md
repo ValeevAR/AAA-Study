@@ -51,8 +51,7 @@
 ```
     
 - проверка вызова функции в случае, когда не указаны аргументы
-  
-  
+    
 ```python
     def test_fit_transform_5(self):
         with self.assertRaises(TypeError):
