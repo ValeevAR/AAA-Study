@@ -8,8 +8,16 @@ class SubAdvert:
         self.advert = advert
 
     # dynamic creation of sub attributes
-    def __getattr__(self, item):
+    def __getattr__(self, item0):
         # code for task 1.2
+
+        if item0 == 'class_':
+            item = 'class'
+        elif item0 == '_price':
+            item = 'price'
+        else:
+            item = item0
+
         if item == 'price' and item not in self.advert:
             return 0
 
@@ -21,14 +29,17 @@ class SubAdvert:
 
 
 # Mixin class. It changes standard color into custom one
-class ColorizeMixin:
-    def __str__(self):
-        return f"\033[{self.repr_color_code}m{self.__repr__()}"
+class ColorizeMixin():
+    def __repr__(self):
+        s = f'{self.title} | {self.price} ₽'
+        return f"\033[{self.repr_color_code}m{s}"
 
 
 class Advert(ColorizeMixin, SubAdvert):
     def __init__(self, *args):
+
         self.repr_color_code = 32
+        self.__repr__ = super(Advert, self).__repr__
 
         # check if input data is not json format. If not, then transform data to {"title":x, "price":x}
         if len(args) == 1:
@@ -36,16 +47,24 @@ class Advert(ColorizeMixin, SubAdvert):
         elif len(args) == 2:
             advert_data = {'title': args[0], 'price': args[1]}
 
-        # loads parent class for dynamic creation of sub attributes
         super().__init__(advert_data)
 
-        # a test if price is lower 0.
-        # Probable, "raise" can be here, but it is not evident from the task
-        if self.price < 0:
-            print('ValueError must be >= 0')
+        # check if price is lower 0
+        self.price = self.price
 
     def __repr__(self):
         return f'{self.title} | {self.price} ₽'
+
+    @property
+    def price(self):
+        return self._price
+
+    # a test if price is lower 0.
+    @price.setter
+    def price(self, value):
+        if value < 0:
+            raise ValueError('must be >= 0')
+        self._price = value
 
 
 if __name__ == '__main__':
@@ -66,16 +85,16 @@ if __name__ == '__main__':
     print(lesson_ad.location.address)
 
     # test for task 1.2 (part 1)
-    lesson_str = """{
-       "title": "python", "price": -999,
-       "location": {
-       "address": "город Москва, Лесная, 7",
-       "metro_stations": ["Белорусская"]
-       }
-       }"""
-
-    lesson = json.loads(lesson_str)
-    lesson_ad = Advert(lesson)
+    # lesson_str = """{
+    #    "title": "python", "price": -999,
+    #    "location": {
+    #    "address": "город Москва, Лесная, 7",
+    #    "metro_stations": ["Белорусская"]
+    #    }
+    #    }"""
+    #
+    # lesson = json.loads(lesson_str)
+    # lesson_ad = Advert(lesson)
 
     # test for task 1.2 (part 2)
     lesson_str = """{
@@ -94,3 +113,25 @@ if __name__ == '__main__':
     print(lesson_ad)
     iphone_ad = Advert('iPhone X', 100)
     print(iphone_ad)
+
+    lesson_ad.price = 5
+    print(lesson_ad.price)
+
+    # lesson_ad.price = -3
+    # print(lesson_ad.price)
+
+    print(iphone_ad.__repr__())
+
+    # test with class_
+    lesson_str = """{
+       "title": "python", 
+       "class": "class_value",
+       "location": {
+       "address": "город Москва, Лесная, 7",
+       "metro_stations": ["Белорусская"]
+       }
+       }"""
+
+    lesson = json.loads(lesson_str)
+    lesson_ad = Advert(lesson)
+    print(lesson_ad.class_)
